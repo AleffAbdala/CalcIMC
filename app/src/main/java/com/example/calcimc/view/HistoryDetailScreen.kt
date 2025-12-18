@@ -84,6 +84,11 @@ fun HistoryDetailScreen(
 
             Text("TMB: ${record!!.tmb} kcal/dia")
             Text("Peso ideal: ${"%.1f".format(record!!.idealWeightKg)} kg")
+
+            Text("TMB: ${record!!.tmb} kcal/dia")
+            Text("Peso ideal: ${"%.1f".format(record!!.idealWeightKg)} kg")
+            Text("Calorias diárias: ${record!!.dailyCalories} kcal/dia")
+
         }
     }
 }

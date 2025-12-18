@@ -63,10 +63,12 @@ fun Home(
             OutlinedTextField(
                 value = height,
                 onValueChange = { value ->
-                    if (!value.contains("-") && value.length <= 3) {
-                        height = value
-                        viewModel.clearError()
-                    }
+                    if (!value.contains("-")) {
+                        val number = value.toIntOrNull()
+                        if (number == null || number <= 250) {
+                            height = value
+                            viewModel.clearError()
+                        }}
                 },
                 label = { Text("Altura (cm)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -247,6 +249,7 @@ fun Home(
                 Text(
                     text = viewModel.tmbResult.value,
                     fontSize = 16.sp,
+                    color = Blue,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -256,6 +259,7 @@ fun Home(
                 Text(
                     text = viewModel.idealWeightResult.value,
                     fontSize = 16.sp,
+                    color = Blue,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -265,6 +269,7 @@ fun Home(
                 Text(
                     text = viewModel.dailyCaloriesResult.value,
                     fontSize = 16.sp,
+                    color = Blue,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
