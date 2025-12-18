@@ -1,110 +1,58 @@
-Calculadora de IMC e Outras Métricas de Saúde
-Descrição do Projeto
+# Trabalho 2 — IMC e outras métricas de saúde (Relatório técnico breve)
 
-Este aplicativo Android permite calcular o Índice de Massa Corporal (IMC) e outras métricas de saúde, como a Taxa Metabólica Basal (TMB), o percentual de gordura e o peso ideal, utilizando o Jetpack Compose para a interface. O aplicativo também oferece funcionalidades como persistência de dados usando Room, permitindo salvar o histórico das medições.
+## 1. Objetivo
+O projeto implementa uma calculadora de saúde em Android (Kotlin + Jetpack Compose) com cálculo de IMC e métricas adicionais, seguindo arquitetura MVVM e persistindo medições em banco local (Room). O foco foi manter a lógica de negócio fora da interface e permitir histórico e consulta detalhada de medições.
 
-O projeto foi desenvolvido em Kotlin e segue a arquitetura MVVM para a separação de responsabilidades entre a camada de apresentação, lógica de negócios e dados.
+## 2. Fórmulas utilizadas
+**IMC (Índice de Massa Corporal):**  
+IMC = peso_kg / (altura_m²).
 
-Funcionalidades
+**TMB (Taxa Metabólica Basal) — Mifflin–St Jeor:**  
+Masculino: 10*peso + 6,25*altura - 5*idade + 5.  
+Feminino: 10*peso + 6,25*altura - 5*idade - 161.  
+(altura em cm e peso em kg)
 
-Cálculo do IMC: Calcula o IMC a partir do peso e altura do usuário e classifica o resultado.
+**Peso ideal — Devine:**  
+Altura convertida para polegadas; considera 5 pés como base (60 polegadas).  
+Masculino: 50 + 2,3*(polegadas_acima_de_60).  
+Feminino: 45,5 + 2,3*(polegadas_acima_de_60).
 
-Taxa Metabólica Basal (TMB): Calcula a TMB utilizando a fórmula de Mifflin-St Jeor.
+**Necessidade calórica diária:**  
+Calorias/dia = TMB × fator de atividade.  
+Fatores usados: sedentário (1,2), leve (1,375), moderado (1,55), intenso (1,725).
 
-Percentual de Gordura Corporal: Estima o percentual de gordura com base em medidas como cintura, pescoço e quadril.
+## 3. Modelo de dados e persistência (Room)
+A aplicação salva um histórico de medições em banco local usando Room. Cada medição contém:
+- id (autogerado)
+- createdAt (data/hora em timestamp)
+- heightCm, weightKg, age, isMale
+- imc e classificação de IMC
+- tmb
+- idealWeightKg
+- activityFactor e dailyCalories
 
-Peso Ideal: Calcula o peso ideal com base em fórmulas como a de Devine.
+A persistência foi implementada com:
+- Entity: `HealthRecord`
+- DAO: `HealthDao` (insert, listagem ordenada por data, busca por id)
+- Database: `HealthDatabase`
+- Repository: `HealthRepository`
+- ViewModel: `HealthViewModel` (orquestra cálculos e gravação)
 
-Necessidade Calórica Diária: Estima a necessidade calórica do usuário considerando sua TMB e o nível de atividade física.
+## 4. Organização e arquitetura (MVVM)
+- A interface é 100% Jetpack Compose e utiliza navegação entre telas.
+- O ViewModel centraliza validação, cálculos e interação com o repositório.
+- O Room concentra a camada de dados, mantendo separação de responsabilidades.
 
-Persistência de Dados: Armazena o histórico das medições em um banco de dados local utilizando Room.
+## 5. Validação
+Foram aplicadas validações para garantir consistência:
+- campos obrigatórios
+- valores positivos
+- altura em faixa realista (50 cm a 250 cm)
+- idade em faixa realista (até 120 anos)
 
-Interface: Desenvolvida inteiramente com Jetpack Compose, com telas para entrada de dados, histórico e detalhes das medições.
-
-Tecnologias Utilizadas
-
-Kotlin
-
-Jetpack Compose
-
-Room Database (Persistência de Dados)
-
-MVVM (Model-View-ViewModel)
-
-Estrutura do Projeto
-├── app/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/example/calcimc/
-│   │   │   │   ├── MainActivity.kt
-│   │   │   │   ├── HealthViewModel.kt
-│   │   │   │   ├── HealthRepository.kt
-│   │   │   ├── res/
-│   │   │   │   ├── drawable/
-│   │   │   │   ├── mipmap/
-│   │   ├── androidTest/
-│   │   ├── unitTest/
-├── gradle/
-├── .gitignore
-├── build.gradle
-
-Como Usar
-
-Clonar o repositório:
-Clone este repositório para o seu computador local:
-
-git clone <URLdoRepositório>
-
-
-Abrir o projeto no Android Studio:
-Abra o Android Studio e importe o projeto clonado.
-
-Rodar o aplicativo:
-Para rodar o aplicativo, basta executar no emulador ou no dispositivo físico. A interface está dividida em telas de entrada de dados, histórico e detalhes de medições.
-
-Requisitos
-
-Android Studio (última versão recomendada)
-
-Android SDK
-
-Persistência de Dados
-
-O aplicativo utiliza o Room para persistir o histórico das medições. A estrutura do banco de dados é definida em classes como HealthDatabase, HealthDao e HealthRepository.
-
-Fórmulas Utilizadas
-
-IMC (Índice de Massa Corporal):
-
-IMC = peso / altura²
-
-
-Taxa Metabólica Basal (TMB) - Mifflin-St Jeor:
-
-Homens:
-
-TMB = 10 * peso + 6.25 * altura - 5 * idade + 5
-
-
-Mulheres:
-
-TMB = 10 * peso + 6.25 * altura - 5 * idade - 161
-
-
-Percentual de Gordura Corporal:
-Fórmula baseada em medidas de cintura, pescoço e quadril.
-
-Peso Ideal:
-Fórmulas como Devine para calcular o peso ideal.
-
-Documentação e Decisões de Arquitetura
-
-A arquitetura foi baseada no padrão MVVM para separar claramente a camada de View (Composables) da ViewModel e da camada de dados. Usamos o StateFlow para gerenciamento de estado e Room para persistência de dados, garantindo uma experiência de usuário fluida e eficiente.
-
-Melhorias Futuras
-
-Integração com APIs externas de saúde: Para enriquecer os cálculos com dados de fontes confiáveis.
-
-Autenticação de usuário: Para salvar dados pessoais e medições de forma mais segura.
-
-Notificações: Lembretes para o usuário inserir medições periodicamente.
+## 6. Melhorias futuras
+Como continuidade, o aplicativo poderia incluir:
+- gráficos de evolução do IMC/TMB
+- exportação do histórico para CSV/PDF
+- notificações para lembrete de medições periódicas
+- integração com APIs de saúde e autenticação
