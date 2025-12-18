@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-// 🔹 NÍVEL DE ATIVIDADE (OPÇÃO A — RECOMENDADA)
 enum class ActivityLevel(val label: String, val factor: Double) {
     SEDENTARY("Sedentário", 1.2),
     LIGHT("Leve", 1.375),
@@ -22,7 +21,7 @@ class HealthViewModel(
     private val repository: HealthRepository
 ) : ViewModel() {
 
-    // ====== RESULTADOS ======
+
     var imcResult = mutableStateOf("")
         private set
 
@@ -52,13 +51,13 @@ class HealthViewModel(
         errorMessage.value = null
     }
 
-    // ====== HISTÓRICO (ROOM) ======
+
     val history: Flow<List<HealthRecord>> = repository.getAll()
 
     fun getRecordById(id: Long): Flow<HealthRecord?> =
         repository.getById(id)
 
-    // ====== VALIDAÇÃO CENTRAL ======
+
     private fun validateInputs(
         height: String,
         weight: String,
@@ -79,13 +78,13 @@ class HealthViewModel(
             return false
         }
 
-        // 🔹 Altura irrealista
+
         if (h < 50 || h > 250) {
             setError("Altura fora do intervalo realista (50 a 250 cm).")
             return false
         }
 
-        // 🔹 Idade irrealista
+
         if (a > 120) {
             setError("Idade fora do intervalo realista.")
             return false
@@ -95,7 +94,9 @@ class HealthViewModel(
         return true
     }
 
-    // ====== IMC ======
+   //IMC (Índice de Massa Corporal)
+   //Fórmula:
+   //IMC = peso (kg) / (altura (m)²)
     fun calculateIMC(height: String, weight: String) {
         val h = height.toDoubleOrNull()
         val w = weight.replace(",", ".").toDoubleOrNull()
@@ -110,7 +111,14 @@ class HealthViewModel(
         }
     }
 
-    // ====== TMB (Mifflin-St Jeor) ======
+    //TMB (Taxa Metabólica Basal)
+    //Fórmula de Mifflin-St Jeor:
+    //Masculino: 10*peso + 6.25*altura - 5*idade + 5
+    //Feminino: 10*peso + 6.25*altura - 5*idade - 161
+    //Onde:
+    //- peso em kg
+    //- altura em cm
+    //- idade em anos
     fun calculateTMB(
         weight: String,
         height: String,
@@ -132,7 +140,13 @@ class HealthViewModel(
         tmbResult.value = "TMB: ${tmb.roundToInt()} kcal/dia"
     }
 
-    // ====== PESO IDEAL (Devine) ======
+    // Peso Ideal
+    // Fórmula de Devine:
+    // Masculino: 50 + 2.3*(polegadas acima de 5 pés)
+    // Feminino: 45.5 + 2.3*(polegadas acima de 5 pés)
+    // Observação:
+    // 1 polegada = 2.54 cm
+    // 5 pés = 60 polegadas
     fun calculateIdealWeight(height: String, isMale: Boolean) {
         val h = height.toDoubleOrNull()
 
@@ -154,7 +168,12 @@ class HealthViewModel(
             "Peso ideal: ${"%.1f".format(idealWeight)} kg"
     }
 
-    // ====== NECESSIDADE CALÓRICA DIÁRIA ======
+    // Necessidade Calórica Diária
+    // Cálculo baseado na TMB multiplicada pelo fator de atividade física.
+    // Fórmula:
+    // Calorias/dia = TMB * fator de atividade
+    // Fatores utilizados:
+    // Sedentário (1.2), Leve (1.375), Moderado (1.55), Intenso (1.725)
     fun calculateDailyCalories(activityLevel: ActivityLevel) {
         val tmbValue = tmbResult.value
             .filter { it.isDigit() }
